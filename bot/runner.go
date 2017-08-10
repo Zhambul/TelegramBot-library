@@ -21,9 +21,6 @@ func Run() {
 			c := RegisterContext(NewBotAccount(msg.From))
 			if msg.ReplyToMessage != nil {
 				log.Println("ON REPLY")
-				if msg.ReplyToMessage.MessageId == 0 {
-					panic("qweewqweq")
-				}
 				c.onReply(c.toMessage(msg), msg.ReplyToMessage.MessageId)
 			} else {
 				c.onMessage(c.toMessage(msg))

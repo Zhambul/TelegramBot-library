@@ -29,9 +29,6 @@ func (c *Context) onReply(m *Message, repliedToId int) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if repliedToId == 0 {
-		panic("qweqweqeweqw")
-	}
 	log.Printf("Checking replyed to %v\n", repliedToId)
 	canHandle := make([]Handler, 0)
 	for _, resp := range c.responses {
@@ -53,7 +50,8 @@ func (c *Context) onReply(m *Message, repliedToId int) {
 	}
 
 	if len(canHandle) > 1 {
-		panic("Too many handlers")
+		log.Printf("ERROR: Too many handlers")
+		return
 	}
 
 	c.Message = m
@@ -129,7 +127,8 @@ func sendInlineAnswer(a *InlineAnswer) {
 	}
 	err := AnswerInlineQuery(answer)
 	if err != nil {
-		panic(err)
+		log.Printf("ERROR: %v\n", err)
+		return
 	}
 	log.Println("sendInlineAnswer END")
 }
@@ -162,7 +161,7 @@ func (c *Context) SendReply(r *Response) {
 	, status code - 400 body - {"ok":false,"error_code":400,"description":"Bad Request: message to edit not found"}
 			  */
 
-			panic(err)
+			log.Printf("ERROR: %v\n",err)
 		}
 		return
 	}
@@ -170,7 +169,8 @@ func (c *Context) SendReply(r *Response) {
 	log.Println("Context::sending message")
 	id, err := SendMessage(reply)
 	if err != nil {
-		panic(err)
+		log.Printf("ERROR: %v\n", err)
+		return
 	}
 
 	r.messageId = id
