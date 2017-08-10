@@ -51,7 +51,7 @@ func GetUpdates(offset int) *Updates {
 		log.Printf("updateId - %v\n", res.UpdateId)
 		if res.Message != nil {
 			res.Message.UpdateId = res.UpdateId
-			log.Printf("got message - %+v", res.Callback)
+			log.Printf("got message - %+v", res.Message)
 			u.Messages = append(u.Messages, res.Message)
 		}
 
@@ -63,7 +63,7 @@ func GetUpdates(offset int) *Updates {
 
 		if res.Inline != nil {
 			res.Inline.UpdateId = res.UpdateId
-			log.Printf("got inlineQuery - %+v", res.Callback)
+			log.Printf("got inlineQuery - %+v", res.Inline)
 			u.Inlines = append(u.Inlines, res.Inline)
 		}
 	}

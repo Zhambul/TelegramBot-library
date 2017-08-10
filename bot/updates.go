@@ -11,7 +11,12 @@ func (c *Context) onInline(i *Inline) {
 	defer c.lock.Unlock()
 	c.Inline = i
 	log.Println("ON INLINE")
-	sendInlineAnswer(inlineHandler.Handle(c))
+	if inlineHandler != nil {
+		r := inlineHandler.Handle(c)
+		if r != nil {
+			sendInlineAnswer(r)
+		}
+	}
 	c.Inline = nil
 }
 
@@ -96,18 +101,9 @@ func (c *Context) onMessage(m *Message) {
 }
 
 func sendInlineAnswer(a *InlineAnswer) {
-
 	log.Println("sendInlineAnswer START")
-	inlineResult := make([]*comm.InlineQueryResult, 0)
-	m := make([][]*comm.InlineKeyboardButton, 0)
-	m1 := make([]*comm.InlineKeyboardButton, 0)
-	m1 = append(m1, &comm.InlineKeyboardButton{
-		Text: a.Button.Text,
-		Url:  a.Button.URL,
-	})
 
-	m = append(m, m1)
-	inlineResult = append(inlineResult, &comm.InlineQueryResult{
+	res := &comm.InlineQueryResult{
 		Type:  "article",
 		Id:    "qweqew",
 		Title: a.Title,
@@ -116,10 +112,26 @@ func sendInlineAnswer(a *InlineAnswer) {
 			ParseMode:   "Markdown",
 		},
 		Description: a.Description,
-		ReplyMarkup: &comm.InlineKeyboardMarkup{
+	}
+
+	if a.Button != nil {
+		m := make([][]*comm.InlineKeyboardButton, 0)
+		m1 := make([]*comm.InlineKeyboardButton, 0)
+		m1 = append(m1, &comm.InlineKeyboardButton{
+			Text: a.Button.Text,
+			Url:  a.Button.URL,
+		})
+		m = append(m, m1)
+		res.ReplyMarkup = &comm.InlineKeyboardMarkup{
 			InlineKeyboard: m,
-		},
-	})
+		}
+	} else {
+		//todo set ReplyMarkup
+	}
+
+	inlineResult := make([]*comm.InlineQueryResult, 0)
+	inlineResult = append(inlineResult, res)
+
 	answer := &comm.InlineQueryAnswer{
 		InlineQueryId: a.InlineId,
 		Results:       inlineResult,
@@ -161,7 +173,7 @@ func (c *Context) SendReply(r *Response) {
 	, status code - 400 body - {"ok":false,"error_code":400,"description":"Bad Request: message to edit not found"}
 			  */
 
-			log.Printf("ERROR: %v\n",err)
+			log.Printf("ERROR: %v\n", err)
 		}
 		return
 	}
