@@ -4,11 +4,11 @@ type Matcher interface {
 	Match(*Context) bool
 }
 
-type SimpleMatcher struct {
+type simpleMatcher struct {
 	Text string
 }
 
-func (m *SimpleMatcher) Match(c *Context) bool {
+func (m *simpleMatcher) Match(c *Context) bool {
 	if m.Text == "" {
 		panic("Not defined matcher pattern")
 	}

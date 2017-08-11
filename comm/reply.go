@@ -1,6 +1,5 @@
 package comm
 
-
 type Reply struct {
 	ChatId      int `json:"chat_id"`
 	Text        string `json:"text"`
@@ -42,8 +41,13 @@ type InlineQueryAnswer struct {
 	CacheTime     int `json:"cache_time"`
 }
 
-
-type DeleteMessage struct {
-	ChatId int `json:"chat_id"`
+type DeleteMsg struct {
+	ChatId    int `json:"chat_id"`
 	MessageId int `json:"message_id"`
+}
+
+type MessageIdResp struct {
+	Result struct {
+		MessageId int `json:"message_id"`
+	}    `json:"result"`
 }

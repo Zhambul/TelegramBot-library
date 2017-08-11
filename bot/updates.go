@@ -10,7 +10,6 @@ func (c *Context) onInline(i *Inline) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.Inline = i
-	log.Println("ON INLINE")
 	if inlineHandler != nil {
 		r := inlineHandler.Handle(c)
 		if r != nil {
@@ -34,7 +33,6 @@ func (c *Context) onReply(m *Message, repliedToId int) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	log.Printf("Checking replyed to %v\n", repliedToId)
 	canHandle := make([]Handler, 0)
 	for _, resp := range c.responses {
 		if resp.ReplyHandler == nil {
@@ -45,10 +43,9 @@ func (c *Context) onReply(m *Message, repliedToId int) {
 			continue
 		}
 
-		log.Println("Calling Reply Handler")
 		canHandle = append(canHandle, resp.ReplyHandler)
-
 	}
+
 	if len(canHandle) < 1 {
 		log.Println("Could not find response to reply")
 		return
@@ -73,13 +70,6 @@ func (c *Context) onMessage(m *Message) {
 		c.CurrentResponse = &Response{}
 	}
 
-	if c.NextHandler != nil {
-		r := c.NextHandler.Handle(c)
-		c.NextHandler = nil
-		c.SendReply(r)
-		return
-	}
-
 	canHandle := make([]Handler, 0)
 	for m, h := range c.handlers {
 		if m.Match(c) {
@@ -87,22 +77,26 @@ func (c *Context) onMessage(m *Message) {
 		}
 	}
 
+	if c.NextHandler != nil {
+		canHandle = append(canHandle, c.NextHandler)
+		c.NextHandler = nil
+	}
+
 	if len(canHandle) < 1 {
-		log.Println("WARNING: NO HANLDER TO HANDLE")
+		log.Println("WARNING: No handler to handle")
 		return
 	}
 
 	if len(canHandle) > 1 {
-		log.Println("WARNING: TOO MORE HANLDER TO HANDLE")
+		log.Println("WARNING: No handler to handle")
 		return
 	}
+
 	r := canHandle[0].Handle(c)
 	c.SendReply(r)
 }
 
 func sendInlineAnswer(a *InlineAnswer) {
-	log.Println("sendInlineAnswer START")
-
 	res := &comm.InlineQueryResult{
 		Type:  "article",
 		Id:    "qweqew",
@@ -137,22 +131,17 @@ func sendInlineAnswer(a *InlineAnswer) {
 		Results:       inlineResult,
 		CacheTime:     0,
 	}
-	err := AnswerInlineQuery(answer)
+	err := comm.AnswerInlineQuery(answer)
 	if err != nil {
 		log.Printf("ERROR: %v\n", err)
 		return
 	}
-	log.Println("sendInlineAnswer END")
 }
 
 func (c *Context) SendReply(r *Response) {
-	log.Println("SEND REPLY START")
 	if r == nil {
 		return
 	}
-	//
-	//c.responses = append(c.responses, r)
-
 	reply := &comm.Reply{
 		ChatId:      c.BotAccount.ChatId,
 		Text:        r.Text,
@@ -161,25 +150,15 @@ func (c *Context) SendReply(r *Response) {
 	}
 
 	if r.messageId != 0 {
-		log.Println("Context::updating message")
 		reply.MessageId = r.messageId
-		err := UpdateMessage(reply)
+		err := comm.UpdateMessage(reply)
 		if err != nil {
-
-			/*TODO
-    2017/08/09 22:42:16 HTTP POST - https://api.telegram.org/bot366621722:AAH5scmfkscK8_Es0dNIJj8gZ-lxluCYD1o/editMessageText
-	2017/08/09 22:42:16 {"chat_id":104563894,"text":"*Gleb* из группы *Тюлени* вызывает через *10* минут\n\nZhambyl - Нет\nMaria - Нет\nGleb - Да\n","message_id":3427,"reply_markup":{"inline_keyboard":[[{"text":"Да","callback_data":"WAijDehyBvKT"},{"text":"Нет","callback_data":"MwOQaYLVcMfr"}],[{"text":"Отменить","callback_data":"mFurHTuhzgZF"}]]},"parse_mode":"Markdown"}
-	panic: HTTP ERROR: url - https://api.telegram.org/bot366621722:AAH5scmfkscK8_Es0dNIJj8gZ-lxluCYD1o/editMessageText
-	, status code - 400 body - {"ok":false,"error_code":400,"description":"Bad Request: message to edit not found"}
-			  */
-
 			log.Printf("ERROR: %v\n", err)
 		}
 		return
 	}
 
-	log.Println("Context::sending message")
-	id, err := SendMessage(reply)
+	id, err := comm.SendMessage(reply)
 	if err != nil {
 		log.Printf("ERROR: %v\n", err)
 		return
@@ -188,13 +167,8 @@ func (c *Context) SendReply(r *Response) {
 	r.messageId = id
 
 	if c.getResponseByMessageId(r.messageId) == nil {
-		log.Println("APPENDING RESPONSE")
 		c.responses = append(c.responses, r)
-	} else {
-		log.Println("NOT APPENDING RESPONSE")
 	}
-
-	log.Println("SEND REPLY END")
 }
 
 func (c *Context) getResponseByMessageId(msgId int) *Response {
@@ -235,11 +209,16 @@ func (c *Context) parseKeyboard(r *Response) *comm.InlineKeyboardMarkup {
 	}
 }
 
-func (c *Context) DeleteResponse(response *Response) error {
-	return deleteMessage(&comm.DeleteMessage{
+func (c *Context) deleteResponseByMessageId(messageId int) error {
+	return comm.DeleteMessage(&comm.DeleteMsg{
 		ChatId:    c.BotAccount.ChatId,
-		MessageId: response.messageId,
+		MessageId: messageId,
 	})
+}
+
+func (c *Context) DeleteResponse(response *Response) error {
+	//todo delete from c.responses
+	return c.deleteResponseByMessageId(response.messageId)
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

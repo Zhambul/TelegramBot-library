@@ -36,11 +36,15 @@ func RegisterInlineHandler(h InlineHandler) {
 	inlineHandler = h
 }
 
-func RegisterDefaultHandler(m Matcher, h Handler) {
+func RegisterMatchedHandler(m Matcher, h Handler) {
 	defaultHandlers[m] = h
 }
 
-func RegisterContext(acc *BotAccount) *Context {
+func RegisterHandler(text string, h Handler) {
+	RegisterMatchedHandler(&simpleMatcher{text}, h)
+}
+
+func GetContext(acc *BotAccount) *Context {
 	if c, has := contexts[acc.ChatId]; has {
 		return c
 	}

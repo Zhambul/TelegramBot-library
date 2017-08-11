@@ -8,7 +8,7 @@ type BotAccount struct {
 	ChatId    int
 }
 
-func NewBotAccount(from *comm.From) *BotAccount {
+func BotAccountFrom(from *comm.From) *BotAccount {
 	return &BotAccount{
 		ChatId:    from.Id,
 		FirstName: from.FirstName,
