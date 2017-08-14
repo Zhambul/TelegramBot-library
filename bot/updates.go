@@ -9,7 +9,10 @@ import (
 func (c *Context) onInline(i *Inline) {
 	c.log.info("Context::onInline START")
 	c.log.info("Context::lock")
-	c.lock.Lock()
+	defer func() {
+		c.log.info("Context::unlock")
+		c.lock.Unlock()
+	}()
 
 	c.Inline = i
 	if inlineHandler != nil {
@@ -20,8 +23,6 @@ func (c *Context) onInline(i *Inline) {
 	}
 	c.Inline = nil
 
-	c.lock.Unlock()
-	c.log.info("Context::unlock")
 	c.log.info("Context::onInline END")
 }
 
@@ -29,6 +30,10 @@ func (c *Context) onCallback(r *Response) {
 	c.log.info("Context::onCallback START")
 	c.log.info("Context::lock")
 	c.lock.Lock()
+	defer func() {
+		c.log.info("Context::unlock")
+		c.lock.Unlock()
+	}()
 
 	c.CurrentResponse = r
 	h := r.ClickedButton.Handler
@@ -38,11 +43,10 @@ func (c *Context) onCallback(r *Response) {
 		r.ClickedButton = nil
 		c.CurrentResponse = nil
 	} else {
+		c.log.info("Context::unlock")
 		c.log.err("Context::onCallback END. Handler is nil")
 	}
 
-	c.log.info("Context::unlock")
-	c.lock.Unlock()
 	c.log.info("Context::onCallback END")
 }
 
@@ -50,6 +54,10 @@ func (c *Context) onReply(m *Message, repliedToId int) {
 	c.log.info("Context::onReply START")
 	c.log.info("Context::lock")
 	c.lock.Lock()
+	defer func() {
+		c.log.info("Context::unlock")
+		c.lock.Unlock()
+	}()
 
 	canHandle := make([]Handler, 0)
 	for _, resp := range c.responses {
@@ -78,9 +86,6 @@ func (c *Context) onReply(m *Message, repliedToId int) {
 	r := canHandle[0].Handle(c)
 	c.SendReply(r)
 	c.Message = nil
-
-	c.log.info("Context::unlock")
-	c.lock.Unlock()
 	c.log.info("Context::onReply END")
 }
 
@@ -88,6 +93,10 @@ func (c *Context) onMessage(m *Message) {
 	c.log.info("Context::onMessage START")
 	c.log.info("Context::lock")
 	c.lock.Lock()
+	defer func() {
+		c.log.info("Context::unlock")
+		c.lock.Unlock()
+	}()
 
 	c.Message = m
 	if c.CurrentResponse == nil {
@@ -118,8 +127,6 @@ func (c *Context) onMessage(m *Message) {
 	r := canHandle[0].Handle(c)
 	c.SendReply(r)
 
-	c.log.info("Context::unlock")
-	c.lock.Unlock()
 	c.log.info("Context::onMessage END")
 }
 
