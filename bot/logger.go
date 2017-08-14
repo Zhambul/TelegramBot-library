@@ -29,6 +29,6 @@ func (l *contextLogger) err(msg string, v ...interface{}) {
 
 func (l *contextLogger) log(msg, level string, v ...interface{}) {
 	formated := fmt.Sprintf(msg, v...)
-	log.Printf("%v: %v | acc: %+v, context %+v\n", level, formated,
-		l.Account, l.Context)
+	log.Printf("%v: %v | acc: %+v\n", level, formated,
+		l.Account)
 }
