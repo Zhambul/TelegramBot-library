@@ -69,8 +69,9 @@ func (c *Context) onMessage(m *Message) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.Message = m
-	c.CurrentResponse = &Response{}
-
+	if c.CurrentResponse == nil {
+		c.CurrentResponse = &Response{}
+	}
 	canHandle := make([]Handler, 0)
 	for m, h := range c.handlers {
 		if m.Match(c) {
