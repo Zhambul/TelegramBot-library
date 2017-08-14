@@ -177,6 +177,7 @@ func (c *Context) sendInlineAnswer(a *InlineAnswer) {
 func (c *Context) SendReply(r *Response) {
 	c.log.info("Context::SendReply START")
 	if r == nil {
+		c.log.info("Context::SendReply END, response is nil")
 		return
 	}
 	reply := &comm.Reply{
@@ -190,7 +191,7 @@ func (c *Context) SendReply(r *Response) {
 		reply.MessageId = r.messageId
 		err := comm.UpdateMessage(reply)
 		if err != nil {
-			log.Printf("ERROR: %v\n", err)
+			c.log.err("Context::SendReply END%v", err)
 		}
 		return
 	}
