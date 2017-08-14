@@ -28,11 +28,11 @@ func (c *Context) onInline(i *Inline) {
 
 func (c *Context) onCallback(r *Response) {
 	c.log.info("Context::onCallback START")
-	//c.log.info("Context::lock")
-	//c.lock.Lock()
+	c.log.info("Context::lock")
+	c.lock.Lock()
 	defer func() {
-		//c.log.info("Context::unlock")
-		//c.lock.Unlock()
+		c.log.info("Context::unlock")
+		c.lock.Unlock()
 	}()
 
 	c.CurrentResponse = r
