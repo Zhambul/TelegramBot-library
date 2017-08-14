@@ -7,8 +7,10 @@ import (
 )
 
 func (c *Context) onInline(i *Inline) {
+	c.log.info("Context::onInline START")
+	c.log.info("Context::lock")
 	c.lock.Lock()
-	defer c.lock.Unlock()
+
 	c.Inline = i
 	if inlineHandler != nil {
 		r := inlineHandler.Handle(c)
@@ -17,11 +19,17 @@ func (c *Context) onInline(i *Inline) {
 		}
 	}
 	c.Inline = nil
+
+	c.lock.Unlock()
+	c.log.info("Context::unlock")
+	c.log.info("Context::onInline END")
 }
 
 func (c *Context) onCallback(r *Response) {
+	c.log.info("Context::onCallback START")
+	c.log.info("Context::lock")
 	c.lock.Lock()
-	defer c.lock.Unlock()
+
 	c.CurrentResponse = r
 	h := r.ClickedButton.Handler
 	if h != nil {
@@ -29,7 +37,13 @@ func (c *Context) onCallback(r *Response) {
 		c.SendReply(newR)
 		r.ClickedButton = nil
 		c.CurrentResponse = nil
+	} else {
+		c.log.err("Context::onCallback END. Handler is nil")
 	}
+
+	c.log.info("Context::unlock")
+	c.lock.Unlock()
+	c.log.info("Context::onCallback END")
 }
 
 func (c *Context) onReply(m *Message, repliedToId int) {
@@ -186,7 +200,6 @@ func (c *Context) SendReply(r *Response) {
 		c.responses = append(c.responses, r)
 	}
 	c.log.info("Context::SendReply END")
-
 }
 
 func (c *Context) getResponseByMessageId(msgId int) *Response {
