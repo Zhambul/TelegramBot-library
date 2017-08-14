@@ -38,7 +38,9 @@ func (c *Context) onCallback(r *Response) {
 	c.CurrentResponse = r
 	h := r.ClickedButton.Handler
 	if h != nil {
+		c.log.info("Context::onCallback. Calling handler START")
 		newR := h.Handle(c)
+		c.log.info("Context::onCallback. Calling handler END")
 		c.SendReply(newR)
 		r.ClickedButton = nil
 		c.CurrentResponse = nil
