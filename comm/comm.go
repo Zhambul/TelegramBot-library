@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"io/ioutil"
 	"encoding/json"
-	"log"
 	"net/http"
 	"fmt"
 	"io"
@@ -82,8 +81,7 @@ func send(url string, body interface{}) (int, error) {
 	bytes, _ := json.Marshal(body)
 	resp, err := post(url, bytes)
 	if err != nil {
-		log.Println(bodyToString(resp.Body))
-		panic(err)
+		return 0, err
 	}
 	defer resp.Body.Close()
 	messageIdResp := MessageIdResp{}

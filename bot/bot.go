@@ -45,6 +45,9 @@ func RegisterHandler(text string, h Handler) {
 }
 
 func GetContext(acc *BotAccount) *Context {
+	if contexts == nil {
+		contexts = make(map[int]*Context)
+	}
 	if c, has := contexts[acc.ChatId]; has {
 		return c
 	}
