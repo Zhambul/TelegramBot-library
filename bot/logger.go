@@ -16,15 +16,15 @@ func newContextLogger(account *BotAccount, context *Context) *contextLogger {
 }
 
 func (l *contextLogger) debug(msg string, v ...interface{}) {
-	log(msg, "DEBUG", v...)
+	l.log(msg, "DEBUG", v...)
 }
 
 func (l *contextLogger) info(msg string, v ...interface{}) {
-	log(msg, "INFO", v...)
+	l.log(msg, "INFO", v...)
 }
 
 func (l *contextLogger) err(msg string, v ...interface{}) {
-	log(msg, "ERROR", v...)
+	l.log(msg, "ERROR", v...)
 }
 
 func (l *contextLogger) log(msg, level string, v ...interface{}) {

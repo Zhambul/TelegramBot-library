@@ -3,7 +3,6 @@ package bot
 import (
 	"bot/comm"
 	"errors"
-	"log"
 )
 
 func (c *Context) toMessage(msg *comm.Message) *Message {

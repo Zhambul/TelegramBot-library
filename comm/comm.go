@@ -16,6 +16,7 @@ import (
 var token string
 
 func Init(tkn string) {
+	log.Println("comm::Init")
 	token = tkn
 }
 
