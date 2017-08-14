@@ -42,6 +42,6 @@ func newContext(acc *BotAccount) *Context {
 }
 
 func (c *Context) RegisterHandler(m Matcher, h Handler) {
-	log.Println("Bot::RegisterHandler")
+	log.Println("Context::RegisterHandler")
 	c.handlers[m] = h
 }
