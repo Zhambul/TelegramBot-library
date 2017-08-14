@@ -1,6 +1,9 @@
 package bot
 
-import "bot/comm"
+import (
+	"bot/comm"
+	"log"
+)
 
 type BotAccount struct {
 	FirstName string
@@ -9,6 +12,7 @@ type BotAccount struct {
 }
 
 func BotAccountFrom(from *comm.From) *BotAccount {
+	log.Println("Bot::BotAccountFrom")
 	return &BotAccount{
 		ChatId:    from.Id,
 		FirstName: from.FirstName,

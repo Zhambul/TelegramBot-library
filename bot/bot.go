@@ -11,44 +11,54 @@ var inlineHandler InlineHandler
 var contexts map[int]*Context
 
 func Init(token string) {
+	log.Println("Bot::Init START")
 	comm.Init(token)
 	defaultHandlers = make(map[Matcher]Handler)
 	contexts = make(map[int]*Context)
 	go deleteOldContexts()
+	log.Println("Bot::Init END")
 }
 
 func deleteOldContexts() {
+	log.Println("Bot::deleteOldContexts START")
 	ticker := time.NewTicker(1 * time.Hour)
 
 	for {
 		<-ticker.C
 		log.Println("Looking for old contexts")
 		for chatId, c := range contexts {
-			log.Println("Deleting old context")
 			if time.Since(c.lastModified) > 6*time.Hour {
+				log.Println("Deleting old context")
 				delete(contexts, chatId)
 			}
 		}
 	}
+
+	log.Println("Bot::deleteOldContexts END")
 }
 
 func RegisterInlineHandler(h InlineHandler) {
+	log.Println("Bot::RegisterInlineHandler")
 	inlineHandler = h
 }
 
 func RegisterMatchedHandler(m Matcher, h Handler) {
+	log.Println("Bot::RegisterMatchedHandler")
 	defaultHandlers[m] = h
 }
 
 func RegisterHandler(text string, h Handler) {
+	log.Println("Bot::RegisterHandler")
 	RegisterMatchedHandler(&simpleMatcher{text}, h)
 }
 
 func GetContext(acc *BotAccount) *Context {
+	log.Println("Bot::GetContext START")
 	if contexts == nil {
 		contexts = make(map[int]*Context)
 	}
 	if c, has := contexts[acc.ChatId]; has {
+		log.Printf("Bot::GetContext END. Found old context for %+v\n", acc)
 		return c
 	}
 	c := newContext(acc)
@@ -56,5 +66,6 @@ func GetContext(acc *BotAccount) *Context {
 		c.RegisterHandler(m, h)
 	}
 	contexts[acc.ChatId] = c
+	log.Printf("Bot::GetContext END. Created new context for %+v\n", acc)
 	return c
 }

@@ -3,6 +3,7 @@ package bot
 import (
 	"time"
 	"sync"
+	"log"
 )
 
 type Context struct {
@@ -24,17 +25,23 @@ type Context struct {
 	//to track and delete old contexts
 	lastModified time.Time
 	lock         sync.Mutex
+
+	log *contextLogger
 }
 
 //construct a context for an account
 func newContext(acc *BotAccount) *Context {
-	return &Context{
+	log.Println("Bot::newContext")
+	c := &Context{
 		BotAccount:      acc,
 		handlers:        make(map[Matcher]Handler),
 		CurrentResponse: &Response{},
 	}
+	c.log = newContextLogger(acc, c)
+	return c
 }
 
 func (c *Context) RegisterHandler(m Matcher, h Handler) {
+	log.Println("Bot::RegisterHandler")
 	c.handlers[m] = h
 }

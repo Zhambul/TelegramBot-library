@@ -2,6 +2,7 @@ package bot
 
 import (
 	"bot/comm"
+	"log"
 )
 
 /**
@@ -17,6 +18,7 @@ import (
  10. go to #1.
  */
 func Run() {
+	log.Println("Bot::Run START")
 	var offset int
 	for {
 		updates, err := comm.GetUpdates(offset)
@@ -24,6 +26,7 @@ func Run() {
 			panic(err)
 		}
 		for _, msg := range updates.Messages {
+			log.Println("Bot::Run Message")
 			c := GetContext(BotAccountFrom(msg.From))
 			if msg.ReplyToMessage != nil {
 				go c.onReply(c.toMessage(msg), msg.ReplyToMessage.MessageId)
@@ -33,6 +36,7 @@ func Run() {
 		}
 
 		for _, callback := range updates.Callbacks {
+			log.Println("Bot::Run Callback")
 			c := GetContext(BotAccountFrom(callback.From))
 			r, err := c.toResponse(callback)
 			if err != nil {
@@ -44,6 +48,7 @@ func Run() {
 		}
 
 		for _, inline := range updates.Inlines {
+			log.Println("Bot::Run Inline")
 			c := GetContext(BotAccountFrom(inline.From))
 			go c.onInline(c.toInline(inline))
 		}

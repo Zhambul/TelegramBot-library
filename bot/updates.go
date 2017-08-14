@@ -13,7 +13,7 @@ func (c *Context) onInline(i *Inline) {
 	if inlineHandler != nil {
 		r := inlineHandler.Handle(c)
 		if r != nil {
-			sendInlineAnswer(r)
+			c.sendInlineAnswer(r)
 		}
 	}
 	c.Inline = nil
@@ -33,8 +33,9 @@ func (c *Context) onCallback(r *Response) {
 }
 
 func (c *Context) onReply(m *Message, repliedToId int) {
+	c.log.info("Context::onReply START")
+	c.log.info("Context::lock")
 	c.lock.Lock()
-	defer c.lock.Unlock()
 
 	canHandle := make([]Handler, 0)
 	for _, resp := range c.responses {
@@ -50,12 +51,12 @@ func (c *Context) onReply(m *Message, repliedToId int) {
 	}
 
 	if len(canHandle) < 1 {
-		log.Println("Could not find response to reply")
+		c.log.info("Context::onReply END. Could not find response to reply")
 		return
 	}
 
 	if len(canHandle) > 1 {
-		log.Printf("ERROR: Too many handlers")
+		c.log.err("Context::onReply END. Too many handlers")
 		return
 	}
 
@@ -63,11 +64,17 @@ func (c *Context) onReply(m *Message, repliedToId int) {
 	r := canHandle[0].Handle(c)
 	c.SendReply(r)
 	c.Message = nil
+
+	c.log.info("Context::unlock")
+	c.lock.Unlock()
+	c.log.info("Context::onReply END")
 }
 
 func (c *Context) onMessage(m *Message) {
+	c.log.info("Context::onMessage START")
+	c.log.info("Context::lock")
 	c.lock.Lock()
-	defer c.lock.Unlock()
+
 	c.Message = m
 	if c.CurrentResponse == nil {
 		c.CurrentResponse = &Response{}
@@ -85,20 +92,25 @@ func (c *Context) onMessage(m *Message) {
 	}
 
 	if len(canHandle) < 1 {
-		log.Println("WARNING: No handler to handle")
+		c.log.info("Context::onMessage END. No handler to handle")
 		return
 	}
 
 	if len(canHandle) > 1 {
-		log.Println("WARNING: No handler to handle")
+		c.log.info("Context::onMessage END. Too much handler to handle")
 		return
 	}
 
 	r := canHandle[0].Handle(c)
 	c.SendReply(r)
+
+	c.log.info("Context::unlock")
+	c.lock.Unlock()
+	c.log.info("Context::onMessage END")
 }
 
-func sendInlineAnswer(a *InlineAnswer) {
+func (c *Context) sendInlineAnswer(a *InlineAnswer) {
+	c.log.info("Context::sendInlineAnswer START")
 	res := &comm.InlineQueryResult{
 		Type:  "article",
 		Id:    "qweqew",
@@ -135,12 +147,14 @@ func sendInlineAnswer(a *InlineAnswer) {
 	}
 	err := comm.AnswerInlineQuery(answer)
 	if err != nil {
-		log.Printf("ERROR: %v\n", err)
+		c.log.err("Context::sendInlineAnswer END, %v", err)
 		return
 	}
+	c.log.info("Context::sendInlineAnswer END")
 }
 
 func (c *Context) SendReply(r *Response) {
+	c.log.info("Context::SendReply START")
 	if r == nil {
 		return
 	}
@@ -171,18 +185,24 @@ func (c *Context) SendReply(r *Response) {
 	if c.getResponseByMessageId(r.messageId) == nil {
 		c.responses = append(c.responses, r)
 	}
+	c.log.info("Context::SendReply END")
+
 }
 
 func (c *Context) getResponseByMessageId(msgId int) *Response {
+	c.log.info("Context::getResponseByMessageId START")
 	for _, resp := range c.responses {
 		if resp.messageId == msgId {
+			c.log.info("Context::getResponseByMessageId END. Found resp %+v", resp)
 			return resp
 		}
 	}
+	c.log.info("Context::getResponseByMessageId END, could not find")
 	return nil
 }
 
 func (c *Context) parseKeyboard(r *Response) *comm.InlineKeyboardMarkup {
+	c.log.info("Context::parseKeyboard START")
 	if len(r.Buttons) == 0 {
 		return nil
 	}
@@ -206,12 +226,14 @@ func (c *Context) parseKeyboard(r *Response) *comm.InlineKeyboardMarkup {
 		ik1 = append(ik1, ik2)
 	}
 
+	c.log.info("Context::parseKeyboard END")
 	return &comm.InlineKeyboardMarkup{
 		InlineKeyboard: ik1,
 	}
 }
 
 func (c *Context) deleteResponseByMessageId(messageId int) error {
+	c.log.info("Context::deleteResponseByMessageId")
 	return comm.DeleteMessage(&comm.DeleteMsg{
 		ChatId:    c.BotAccount.ChatId,
 		MessageId: messageId,
@@ -220,6 +242,7 @@ func (c *Context) deleteResponseByMessageId(messageId int) error {
 
 func (c *Context) DeleteResponse(response *Response) error {
 	//todo delete from c.responses
+	c.log.info("Context::DeleteResponse")
 	return c.deleteResponseByMessageId(response.messageId)
 }
 
