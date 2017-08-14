@@ -23,10 +23,13 @@ func (c *Context) onCallback(r *Response) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.CurrentResponse = r
-	newR := r.ClickedButton.Handler.Handle(c)
-	c.SendReply(newR)
-	r.ClickedButton = nil
-	c.CurrentResponse = nil
+	h := r.ClickedButton.Handler
+	if h != nil {
+		newR := h.Handle(c)
+		c.SendReply(newR)
+		r.ClickedButton = nil
+		c.CurrentResponse = nil
+	}
 }
 
 func (c *Context) onReply(m *Message, repliedToId int) {
@@ -66,9 +69,7 @@ func (c *Context) onMessage(m *Message) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.Message = m
-	if c.CurrentResponse == nil {
-		c.CurrentResponse = &Response{}
-	}
+	c.CurrentResponse = &Response{}
 
 	canHandle := make([]Handler, 0)
 	for m, h := range c.handlers {
