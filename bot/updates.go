@@ -101,9 +101,8 @@ func (c *Context) onMessage(m *Message) {
 	}()
 
 	c.Message = m
-	if c.CurrentResponse == nil {
-		c.CurrentResponse = &Response{}
-	}
+	c.CurrentResponse = &Response{}
+
 	canHandle := make([]Handler, 0)
 	for m, h := range c.handlers {
 		if m.Match(c) {
