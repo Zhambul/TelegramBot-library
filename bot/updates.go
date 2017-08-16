@@ -41,7 +41,7 @@ func (c *Context) onCallback(r *Response) {
 		c.log.info("Context::onCallback. Calling handler START")
 		newR := h.Handle(c)
 		c.log.info("Context::onCallback. Calling handler END")
-		c.SendReply(newR)
+		c.Send(newR)
 		r.ClickedButton = nil
 		c.CurrentResponse = nil
 	} else {
@@ -86,7 +86,7 @@ func (c *Context) onReply(m *Message, repliedToId int) {
 
 	c.Message = m
 	r := canHandle[0].Handle(c)
-	c.SendReply(r)
+	c.Send(r)
 	c.Message = nil
 	c.log.info("Context::onReply END")
 }
@@ -126,7 +126,7 @@ func (c *Context) onMessage(m *Message) {
 	}
 
 	r := canHandle[0].Handle(c)
-	c.SendReply(r)
+	c.Send(r)
 
 	c.log.info("Context::onMessage END")
 }
@@ -175,7 +175,7 @@ func (c *Context) sendInlineAnswer(a *InlineAnswer) {
 	c.log.info("Context::sendInlineAnswer END")
 }
 
-func (c *Context) SendReply(r *Response) {
+func (c *Context) Send(r *Response) {
 	c.log.info("Context::SendReply START")
 	if r == nil {
 		c.log.info("Context::SendReply END, response is nil")
