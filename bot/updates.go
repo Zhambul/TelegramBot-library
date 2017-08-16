@@ -9,6 +9,7 @@ import (
 func (c *Context) onInline(i *Inline) {
 	c.log.info("Context::onInline START")
 	c.log.info("Context::lock")
+	c.lock.Lock()
 	defer func() {
 		c.log.info("Context::unlock")
 		c.lock.Unlock()
@@ -16,10 +17,7 @@ func (c *Context) onInline(i *Inline) {
 
 	c.Inline = i
 	if inlineHandler != nil {
-		r := inlineHandler.Handle(c)
-		if r != nil {
-			c.sendInlineAnswer(r)
-		}
+		c.sendInlineAnswer(inlineHandler.Handle(c))
 	}
 	c.Inline = nil
 
@@ -132,6 +130,9 @@ func (c *Context) onMessage(m *Message) {
 }
 
 func (c *Context) sendInlineAnswer(a *InlineAnswer) {
+	if a == nil {
+		return
+	}
 	c.log.info("Context::sendInlineAnswer START")
 	res := &comm.InlineQueryResult{
 		Type:  "article",
