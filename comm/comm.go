@@ -20,7 +20,9 @@ func Init(tkn string) {
 	token = tkn
 }
 
-func GetUpdates(offset int) (*Updates, error) {
+var offset int
+
+func GetUpdates() (*Updates, error) {
 	log.Println("Comm::GetUpdates START")
 	resp, err := getUpdatesQuery(offset)
 	if err != nil {
@@ -58,7 +60,7 @@ func GetUpdates(offset int) (*Updates, error) {
 			u.Inlines = append(u.Inlines, res.Inline)
 		}
 	}
-	u.NextUpdateId = getNextUpdateId(updateIds)
+	offset = getNextUpdateId(updateIds)
 	log.Println("Comm::GetUpdates END")
 	return u, nil
 }

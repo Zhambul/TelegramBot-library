@@ -1,7 +1,7 @@
 package comm
 
 type Updates struct {
-	NextUpdateId int
+	//NextUpdateId int
 	Messages     []*Message
 	Callbacks    []*Callback
 	Inlines      []*Inline

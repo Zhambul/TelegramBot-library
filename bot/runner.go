@@ -19,9 +19,8 @@ import (
  */
 func Run() {
 	log.Println("Bot::Run START")
-	var offset int
 	for {
-		updates, err := comm.GetUpdates(offset)
+		updates, err := comm.GetUpdates()
 		if err != nil {
 			panic(err)
 		}
@@ -52,7 +51,5 @@ func Run() {
 			c := GetContext(BotAccountFrom(inline.From))
 			go c.onInline(c.toInline(inline))
 		}
-
-		offset = updates.NextUpdateId
 	}
 }
