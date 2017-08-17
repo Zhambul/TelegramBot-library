@@ -34,6 +34,10 @@ func (c *Context) onCallback(r *Response) {
 	}()
 
 	c.CurrentResponse = r
+	if r.ClickedButton == nil {
+		c.log.err("Context::onCallback END. ClickedButton is nil")
+		return
+	}
 	h := r.ClickedButton.Handler
 	if h != nil {
 		c.log.info("Context::onCallback. Calling handler START")
