@@ -186,9 +186,11 @@ func (c *Context) Send(r *Response) {
 		c.log.info("Context::SendReply END, response is nil")
 		return
 	}
+
 	defer func() {
 		c.addResponse(r)
 	}()
+
 	reply := &comm.Reply{
 		ChatId:      c.BotAccount.ChatId,
 		Text:        r.Text,
