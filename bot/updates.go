@@ -186,6 +186,9 @@ func (c *Context) Send(r *Response) {
 		c.log.info("Context::SendReply END, response is nil")
 		return
 	}
+	defer func() {
+		c.addResponse(r)
+	}()
 	reply := &comm.Reply{
 		ChatId:      c.BotAccount.ChatId,
 		Text:        r.Text,
@@ -209,11 +212,17 @@ func (c *Context) Send(r *Response) {
 	}
 
 	r.messageId = id
+	c.log.info("Context::SendReply END")
+}
 
+func (c *Context) addResponse(r *Response) {
+	c.log.info("Context::addResponse START")
 	if c.getResponseByMessageId(r.messageId) == nil {
 		c.responses = append(c.responses, r)
+		c.log.info("Context::addResponse END. New response added")
+		return
 	}
-	c.log.info("Context::SendReply END")
+	c.log.info("Context::addResponse END. No need to add")
 }
 
 func (c *Context) getResponseByMessageId(msgId int) *Response {
