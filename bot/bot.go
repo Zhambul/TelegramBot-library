@@ -59,6 +59,7 @@ func GetContext(acc *BotAccount) *Context {
 	}
 	if c, has := contexts[acc.ChatId]; has {
 		log.Printf("Bot::GetContext END. Found old context for %+v\n", acc)
+		c.lastModified = time.Now()
 		return c
 	}
 	c := newContext(acc)

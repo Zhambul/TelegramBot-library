@@ -36,6 +36,7 @@ func newContext(acc *BotAccount) *Context {
 		BotAccount:      acc,
 		handlers:        make(map[Matcher]Handler),
 		CurrentResponse: &Response{},
+		lastModified: time.Now(),
 	}
 	c.log = newContextLogger(acc, c)
 	return c
