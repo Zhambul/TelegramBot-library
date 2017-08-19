@@ -279,7 +279,7 @@ func (c *Context) deleteResponseByMessageId(messageId int) error {
 }
 
 func (c *Context) DeleteResponse(response *Response) error {
-	//todo delete from c.responses
+	//todo delete from d.responses
 	c.log.info("Context::DeleteResponse")
 	return c.deleteResponseByMessageId(response.messageId)
 }
