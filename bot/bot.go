@@ -21,7 +21,7 @@ func Init(token string) {
 
 func deleteOldContexts() {
 	log.Println("Bot::deleteOldContexts START")
-	ticker := time.NewTicker(1 * time.Hour)
+	ticker := time.NewTicker(1 * time.Minute)
 
 	for {
 		<-ticker.C
