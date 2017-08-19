@@ -19,24 +19,6 @@ func Init(token string) {
 	log.Println("Bot::Init END")
 }
 
-func deleteOldContexts() {
-	log.Println("Bot::deleteOldContexts START")
-	ticker := time.NewTicker(1 * time.Minute)
-
-	for {
-		<-ticker.C
-		log.Println("Looking for old contexts")
-		for chatId, c := range contexts {
-			if time.Since(c.lastModified) > 6*time.Hour {
-				log.Println("Deleting old context")
-				delete(contexts, chatId)
-			}
-		}
-	}
-
-	log.Println("Bot::deleteOldContexts END")
-}
-
 func RegisterInlineHandler(h InlineHandler) {
 	log.Println("Bot::RegisterInlineHandler")
 	inlineHandler = h
@@ -69,4 +51,22 @@ func GetContext(acc *BotAccount) *Context {
 	contexts[acc.ChatId] = c
 	log.Printf("Bot::GetContext END. Created new context for %+v\n", acc)
 	return c
+}
+
+func deleteOldContexts() {
+	log.Println("Bot::deleteOldContexts START")
+	ticker := time.NewTicker(1 * time.Hour)
+
+	for {
+		<-ticker.C
+		log.Println("Looking for old contexts")
+		for chatId, c := range contexts {
+			if time.Since(c.lastModified) > 6*time.Hour {
+				log.Println("Deleting old context")
+				delete(contexts, chatId)
+			}
+		}
+	}
+
+	log.Println("Bot::deleteOldContexts END")
 }
