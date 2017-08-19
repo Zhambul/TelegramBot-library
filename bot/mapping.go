@@ -16,6 +16,7 @@ func (c *Context) toResponse(callback *comm.Callback) (*Response, error) {
 	c.log.info("Bot::toResponse START")
 	if len(c.responses) == 0 {
 		c.log.err("Bot::toResponse. No responses in context")
+		return nil, errors.New("Not found")
 	}
 	for _, r := range c.responses {
 		for _, btnRow := range r.Buttons {
