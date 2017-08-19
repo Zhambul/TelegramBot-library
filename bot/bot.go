@@ -61,7 +61,7 @@ func deleteOldContexts() {
 		<-ticker.C
 		log.Println("Bot::deleteOldContexts. Looking for old contexts")
 		for chatId, c := range contexts {
-			if time.Since(c.lastModified) > 6*time.Hour {
+			if time.Since(c.lastModified) > 24 *time.Hour {
 				log.Println("Bot::deleteOldContexts. Deleting old context")
 				delete(contexts, chatId)
 			}
