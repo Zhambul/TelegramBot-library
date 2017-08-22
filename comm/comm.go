@@ -33,6 +33,7 @@ func EnableWebhook(host string) error {
 		log.Println("Webhook START")
 		print(bodyToString(r.Body))
 		log.Println("Webhook END")
+		w.Write([]byte("Hi!"))
 	})
 	return update("setWebhook", webhook{
 		url: url,
