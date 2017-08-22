@@ -28,6 +28,7 @@ func (c *Context) onCallback(r *Response) {
 	c.log.info("Context::onCallback START")
 	c.log.info("Context::lock")
 	c.lock.Lock()
+	c.NextHandler = nil
 	defer func() {
 		c.log.info("Context::unlock")
 		c.lock.Unlock()
