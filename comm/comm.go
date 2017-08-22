@@ -28,7 +28,7 @@ var webhookUpdatesChan chan (*Updates)
 func EnableWebhook(host string) error {
 	webhookEnabled = true
 	url := host + "/webhook"
-	log.Printf("Setting webhook to url START%v\n", url)
+	log.Printf("Setting webhook to url START %v\n", url)
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Webhook START")
 		print(bodyToString(r.Body))
@@ -184,7 +184,7 @@ func request(method string, telegramMethod string, params map[string]string, bod
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
-	log.Printf("HTTP %v - %v", method, req.URL.RawQuery)
+	log.Printf("HTTP %v - %v", method, req.URL)
 	resp, err := client.Do(req)
 	if err != nil {
 		return resp, err
