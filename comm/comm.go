@@ -183,6 +183,7 @@ func request(method string, telegramMethod string, params map[string]string, bod
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
+	log.Printf("HTTP %v - %v", method, req.URL.RawQuery)
 	resp, err := client.Do(req)
 	if err != nil {
 		return resp, err
