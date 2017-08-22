@@ -28,6 +28,7 @@ var webhookUpdatesChan chan (*Updates)
 func EnableWebhook(host string) error {
 	webhookEnabled = true
 	url := host + "/webhook"
+	log.Printf("Setting webhook to url %v\n", url)
 	http.HandleFunc(url, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Webhook START")
 		print(bodyToString(r.Body))
