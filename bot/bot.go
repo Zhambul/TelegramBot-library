@@ -35,6 +35,7 @@ func RegisterHandler(text string, h Handler) {
 }
 
 func EnableWebhook(host string) error {
+	log.Println("Bot::EnableWebhook")
 	return comm.EnableWebhook(host)
 }
 
