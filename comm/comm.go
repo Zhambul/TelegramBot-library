@@ -35,7 +35,7 @@ func EnableWebhook(host string) error {
 		log.Println("Webhook END")
 		w.Write([]byte("Hi!"))
 	})
-	go http.ListenAndServe(":80", nil)
+	go http.ListenAndServe(":443", nil)
 	log.Printf("Setting webhook to url END %v\n", url)
 	r, err := post("setWebhook", Webhook{
 		Url: url,
