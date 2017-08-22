@@ -21,7 +21,7 @@ func (c *Context) toResponse(callback *comm.Callback) (*Response, error) {
 	for _, r := range c.responses {
 		for _, btnRow := range r.Buttons {
 			for _, btn := range btnRow {
-				c.log.info("Bot::toResponse. Comparing callbackData %v - %v", btn.callbackData, callback.CallbackData)
+				//c.log.info("Bot::toResponse. Comparing callbackData %v - %v", btn.callbackData, callback.CallbackData)
 				if btn.callbackData == callback.CallbackData {
 					r.ClickedButton = btn
 					c.log.info("Bot::toResponse END. Found clicked button in response %+v", r)
