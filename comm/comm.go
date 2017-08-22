@@ -28,14 +28,15 @@ var webhookUpdatesChan chan (*Updates)
 func EnableWebhook(host string) error {
 	webhookEnabled = true
 	url := host + "/webhook"
-	log.Printf("Setting webhook to url %v\n", url)
+	log.Printf("Setting webhook to url START%v\n", url)
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Webhook START")
 		print(bodyToString(r.Body))
 		log.Println("Webhook END")
 		w.Write([]byte("Hi!"))
 	})
-	go log.Fatal(http.ListenAndServe(":80", nil))
+	go http.ListenAndServe(":80", nil)
+	log.Printf("Setting webhook to url END %v\n", url)
 	r, err := post("setWebhook", webhook{
 		url: url,
 	})
