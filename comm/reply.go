@@ -1,7 +1,7 @@
 package comm
 
-type webhook struct {
-	url string
+type Webhook struct {
+	Url string `json:"url"`
 }
 type Reply struct {
 	ChatId      int `json:"chat_id"`
