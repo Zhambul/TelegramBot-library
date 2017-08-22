@@ -34,6 +34,10 @@ func RegisterHandler(text string, h Handler) {
 	RegisterMatchedHandler(&simpleMatcher{text}, h)
 }
 
+func EnableWebhook(host string) error {
+	return comm.EnableWebhook(host)
+}
+
 func GetContext(acc *BotAccount) *Context {
 	log.Println("Bot::GetContext START")
 	if contexts == nil {

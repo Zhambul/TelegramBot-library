@@ -22,11 +22,41 @@ func Init(tkn string) {
 
 var offset int
 
+var webhookEnabled bool
+var webhookUpdatesChan chan (*Updates)
+
+func EnableWebhook(host string) error {
+	webhookEnabled = true
+	url := host + "/webhook"
+	http.HandleFunc(url, func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Webhook START")
+		print(bodyToString(r.Body))
+		log.Println("Webhook END")
+	})
+	return update("setWebhook", webhook{
+		url: url,
+	})
+}
+
 func GetUpdates() (*Updates, error) {
 	log.Println("Comm::GetUpdates START")
+	defer func() {
+		log.Println("Comm::GetUpdates END")
+	}()
+
+	if !webhookEnabled {
+		return pullUpdates()
+	} else {
+		log.Println("Comm::GetUpdates. Waiting for update")
+		return <-webhookUpdatesChan, nil
+	}
+}
+
+func pullUpdates() (*Updates, error) {
+	log.Println("Comm::pullUpdates START")
 	resp, err := getUpdatesQuery(offset)
 	if err != nil {
-		log.Printf("Comm::GetUpdates END. Cannot get update, %v\n", err)
+		log.Printf("Comm::pullUpdates END. Cannot get update, %v\n", err)
 		return nil, errors.New("cannot get update")
 	}
 
@@ -44,24 +74,24 @@ func GetUpdates() (*Updates, error) {
 
 		if res.Message != nil {
 			res.Message.UpdateId = res.UpdateId
-			log.Printf("Comm::GetUpdates Message")
+			log.Printf("Comm::pullUpdates Message")
 			u.Messages = append(u.Messages, res.Message)
 		}
 
 		if res.Callback != nil {
 			res.Callback.UpdateId = res.UpdateId
-			log.Printf("Comm::GetUpdates Callback")
+			log.Printf("Comm::pullUpdates Callback")
 			u.Callbacks = append(u.Callbacks, res.Callback)
 		}
 
 		if res.Inline != nil {
 			res.Inline.UpdateId = res.UpdateId
-			log.Printf("Comm::GetUpdates Inline")
+			log.Printf("Comm::pullUpdates Inline")
 			u.Inlines = append(u.Inlines, res.Inline)
 		}
 	}
 	offset = getNextUpdateId(updateIds)
-	log.Println("Comm::GetUpdates END")
+	log.Println("Comm::pullUpdates END")
 	return u, nil
 }
 
