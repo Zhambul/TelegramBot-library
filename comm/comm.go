@@ -36,9 +36,11 @@ func EnableWebhook(host string) error {
 		w.Write([]byte("Hi!"))
 	})
 	log.Fatal(http.ListenAndServe(":80", nil))
-	return update("setWebhook", webhook{
+	r, err := post("setWebhook", webhook{
 		url: url,
 	})
+	log.Println(bodyToString(r.Body))
+	return err
 }
 
 func GetUpdates() (*Updates, error) {
@@ -100,36 +102,13 @@ func pullUpdates() (*Updates, error) {
 
 func UpdateMessage(reply *Reply) error {
 	log.Println("Comm::UpdateMessage")
-	return update("editMessageText", reply)
+	_, err := post("editMessageText", reply)
+	return err
 }
 
 func SendMessage(reply *Reply) (int, error) {
 	log.Println("Comm::SendMessage")
-	return send("sendMessage", reply)
-}
-
-func AnswerInlineQuery(a *InlineQueryAnswer) error {
-	log.Println("Comm::AnswerInlineQuery")
-	return update("answerInlineQuery", a)
-}
-
-func DeleteMessage(d *DeleteMsg) error {
-	log.Println("Comm::DeleteMessage")
-	return update("deleteMessage", d)
-}
-
-func update(url string, body interface{}) error {
-	log.Println("Comm::update START")
-	bytes, _ := json.Marshal(body)
-	_, err := post(url, bytes)
-	log.Println("Comm::update END")
-	return err
-}
-
-func send(url string, body interface{}) (int, error) {
-	log.Println("Comm::send START")
-	bytes, _ := json.Marshal(body)
-	resp, err := post(url, bytes)
+	resp, err := post("sendMessage", reply)
 	if err != nil {
 		log.Printf("Comm::send END. ERROR - %v\n", err)
 		return 0, err
@@ -142,6 +121,18 @@ func send(url string, body interface{}) (int, error) {
 	return messageIdResp.Result.MessageId, err
 }
 
+func AnswerInlineQuery(a *InlineQueryAnswer) error {
+	log.Println("Comm::AnswerInlineQuery")
+	_, err := post("answerInlineQuery", a)
+	return err
+}
+
+func DeleteMessage(d *DeleteMsg) error {
+	log.Println("Comm::DeleteMessage")
+	_, err := post("deleteMessage", d)
+	return err
+}
+
 func getNextUpdateId(updateIds []int) int {
 	log.Println("Comm::getNextUpdateId")
 	updatesLen := len(updateIds)
@@ -151,11 +142,6 @@ func getNextUpdateId(updateIds []int) int {
 	return updateIds[updatesLen-1] + 1
 }
 
-func post(methodName string, body []byte) (*http.Response, error) {
-	log.Println("Comm::post")
-	return request("POST", methodName, nil, bytes.NewReader(body))
-}
-
 func getUpdatesQuery(offset int) (*http.Response, error) {
 	log.Println("Comm::getUpdatesQuery")
 	params := make(map[string]string)
@@ -163,11 +149,21 @@ func getUpdatesQuery(offset int) (*http.Response, error) {
 		params["offset"] = strconv.Itoa(offset)
 	}
 	params["timeout"] = strconv.Itoa(1000)
-	return request("GET", "getUpdates", params, nil)
+	return get("getUpdates", params)
 }
 
 var client = &http.Client{
 	Timeout: time.Second * 100,
+}
+
+func get(methodName string, params map[string]string) (*http.Response, error) {
+	return request("GET", methodName, params, nil)
+}
+
+func post(methodName string, body interface{}) (*http.Response, error) {
+	log.Println("Comm::post")
+	b, _ := json.Marshal(body)
+	return request("POST", methodName, nil, bytes.NewReader(b))
 }
 
 func request(method string, telegramMethod string, params map[string]string, body io.Reader) (*http.Response, error) {
