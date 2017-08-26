@@ -22,7 +22,8 @@ func Run() {
 	for {
 		updates, err := comm.GetUpdates()
 		if err != nil {
-			panic(err)
+			log.Printf("ERROR: %v\n", err)
+			continue
 		}
 		for _, msg := range updates.Messages {
 			log.Println("Bot::Run Message")
