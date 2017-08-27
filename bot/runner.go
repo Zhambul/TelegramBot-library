@@ -40,7 +40,7 @@ func Run() {
 			c := GetContext(BotAccountFrom(callback.From))
 			r, err := c.toResponse(callback)
 			if err != nil {
-				go c.deleteResponseByMessageId(callback.Message.MessageId)
+				//go c.deleteResponseByMessageId(callback.Message.MessageId)
 				continue
 			}
 
