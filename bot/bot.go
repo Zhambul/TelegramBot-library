@@ -15,7 +15,7 @@ func Init(token string) {
 	comm.Init(token)
 	defaultHandlers = make(map[Matcher]Handler)
 	contexts = make(map[int]*Context)
-	//go deleteOldContexts()
+	go deleteOldContexts()
 	log.Println("Bot::Init END")
 }
 
